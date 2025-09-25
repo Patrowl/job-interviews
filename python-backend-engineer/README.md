@@ -1,5 +1,5 @@
-# URL shortener
-A simple Django + DRF-based URL shortener that generates short codes for redirects and provides an API to create and retrieve short URLs.
+# Link shortener
+A simple Django + DRF-based link shortener that generates short codes for redirects and provides an API to create and retrieve short links.
 
 ## Local deployment
 
