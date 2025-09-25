@@ -17,3 +17,8 @@ class Link(models.Model):
 
     def __str__(self) -> str:
         return f"{self.short_code} -> {self.original_url}"
+
+
+class LinkClick(models.Model):
+    link: models.ForeignKey = models.ForeignKey(Link, on_delete=models.CASCADE, related_name="clicks")
+    clicked_at = models.DateTimeField(auto_now_add=True)

@@ -1,4 +1,5 @@
 import json
+from re import L
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -6,8 +7,8 @@ from django.shortcuts import get_object_or_404, redirect
 from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 
-from .models import Link
-from .serializers import LinkCreateSerializer, LinkSerializer
+from .models import Link, LinkClick
+from .serializers import LinkClickSerializer, LinkCreateSerializer, LinkSerializer
 
 
 class ShortenLinkAPIView(APIView):
@@ -27,7 +28,7 @@ class ShortenLinkAPIView(APIView):
         serializer = LinkCreateSerializer(data=data)
         if serializer.is_valid():
             original_url: str = serializer.validated_data["url"]
-            link_obj, created = Link.objects.get_or_create(original_url=original_url)
+            link_obj, _ = Link.objects.get_or_create(original_url=original_url)
             output_serializer = LinkSerializer(link_obj)
             return JsonResponse(output_serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
@@ -39,6 +40,9 @@ class RedirectLinkAPIView(APIView):
         self, request: HttpRequest, short_code: str, *args: Any, **kwargs: Any
     ) -> HttpResponse:
         link_obj = get_object_or_404(Link, short_code=short_code)
+        LinkClick.objects.create(
+            link=link_obj,
+        )
         return redirect(link_obj.original_url)
 
 
@@ -55,3 +59,24 @@ class RetrieveLinkAPIView(APIView):
         link_obj = get_object_or_404(Link, short_code=short_code)
         serializer = LinkSerializer(link_obj)
         return JsonResponse(serializer.data)
+
+
+class LinkStatsAPIView(APIView):
+    @extend_schema(
+        description="Retrieve statistics about a shortened URL",
+        methods=["GET"],
+        responses={200: LinkClickSerializer},
+        tags=["Links"],
+    )
+    def get(self, request: HttpRequest) -> JsonResponse:
+        links: list[Link] = Link.objects.all()
+        stats_data = []
+        for link in links:
+            stats_data.append({
+                'short_code': link.short_code,
+                'click_count': link.clicks.count(),
+                'last_click': link.clicks.first().clicked_at if link.clicks.exists() else None
+            })
+
+        serializer = LinkClickSerializer(stats_data, many=True)
+        return JsonResponse(serializer.data, safe=False)
