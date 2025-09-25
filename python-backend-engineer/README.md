@@ -10,6 +10,7 @@ Follow the instructions at [https://mise.jdx.dev/getting-started.html](https://m
 ```bash
 cd python-backend-engineer
 mise trust
+mise install
 ```
 Specific version of Python and Poetry will be installed in the current folder, and a Python virtual environment will be created and activated.
 
