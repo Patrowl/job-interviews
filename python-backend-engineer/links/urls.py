@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import RedirectLinkAPIView, RetrieveLinkAPIView, ShortenLinkAPIView
+from .views import LinkStatsAPIView, RedirectLinkAPIView, RetrieveLinkAPIView, ShortenLinkAPIView
 
 urlpatterns = [
     path("api/shorten/", ShortenLinkAPIView.as_view(), name="shorten_link"),
@@ -10,4 +10,5 @@ urlpatterns = [
         RetrieveLinkAPIView.as_view(),
         name="retrieve_link",
     ),
+    path("api/stats/", LinkStatsAPIView.as_view(), name="link_stats"),
 ]
